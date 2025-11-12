@@ -31,9 +31,9 @@ A comprehensive React Native Expo application for managing medicine reminders wi
 
 - **React Native**: Cross-platform mobile development
 - **Expo**: Development platform and toolchain
-- **Firebase**: Authentication and user management
+- **Firebase Authentication**: Secure user authentication and session management
+- **Firebase Firestore**: Cloud NoSQL database for real-time data sync
 - **React Navigation**: Navigation between screens
-- **AsyncStorage**: Local data persistence
 - **expo-barcode-scanner**: Barcode scanning functionality
 - **expo-location**: Location services for finding nearby clinics
 - **expo-splash-screen**: Professional splash screen
@@ -46,7 +46,7 @@ A comprehensive React Native Expo application for managing medicine reminders wi
 - npm or yarn
 - Expo CLI (optional, for easier development)
 - Expo Go app on your mobile device (for testing)
-- Firebase account (for authentication)
+- Firebase account (for authentication and database)
 
 ### Setup
 
@@ -63,8 +63,11 @@ npm install
 
 3. **Configure Firebase** (IMPORTANT):
    - Follow the detailed guide in [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
+   - Create a Firebase project at console.firebase.google.com
+   - Enable Email/Password authentication
+   - Enable Firestore Database
+   - Set up Firestore security rules (provided in guide)
    - Update `src/config/firebase.js` with your Firebase credentials
-   - Enable Email/Password authentication in Firebase Console
 
 4. Start the development server:
 ```bash
@@ -140,18 +143,23 @@ npm start
 
 - **Camera**: For barcode scanning functionality
 - **Location**: For finding nearby clinics with medicine stock
-- **Internet**: For Firebase Authentication
+- **Internet**: For Firebase Authentication and Firestore Database
 
 ## Data Storage
 
 **Authentication**: User accounts and sessions are managed by Firebase Authentication.
 
-**Local Storage**: All medicine and clinic data is stored locally on the device using AsyncStorage:
-- Patient medicines
-- Clinic medicines
-- Clinic information
+**Database**: All medicine and clinic data is stored in **Firebase Firestore** (cloud database):
+- Patient medicines - synced across all your devices
+- Clinic medicines - real-time inventory updates
+- Clinic information - accessible from anywhere
 
-No medicine data is sent to external servers, ensuring privacy and offline functionality after authentication.
+**Benefits:**
+- ✅ Automatic cloud backup
+- ✅ Real-time synchronization across devices
+- ✅ Offline support with automatic sync when online
+- ✅ Secure user-specific data access
+- ✅ No data loss if device is lost or replaced
 
 ## Project Structure
 
@@ -199,9 +207,11 @@ medicine-remindet/
 ## Security
 
 - Firebase Authentication provides secure user management
-- Passwords are never stored locally
+- Firebase Firestore has security rules ensuring users can only access their own data
+- Passwords are never stored locally or in Firestore
 - All authentication tokens are encrypted
-- Local medicine data is stored securely on device
+- All data transmission is encrypted (HTTPS/TLS)
+- Firestore security rules prevent unauthorized access
 - Follow the [FIREBASE_SETUP.md](FIREBASE_SETUP.md) guide for secure configuration
 
 ## Troubleshooting
@@ -210,6 +220,13 @@ medicine-remindet/
 - Make sure Firebase is properly configured (see FIREBASE_SETUP.md)
 - Check that Email/Password authentication is enabled in Firebase Console
 - Verify internet connection for authentication
+
+### Database/Firestore Issues
+- Verify Firestore is enabled in Firebase Console
+- Check that security rules are properly set up (see FIREBASE_SETUP.md)
+- Ensure you're logged in when accessing data
+- Check browser/app console for permission errors
+- Verify internet connection for real-time sync
 
 ### App Crashes
 - Clear app cache and restart

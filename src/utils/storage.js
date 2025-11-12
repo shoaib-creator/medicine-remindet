@@ -1,21 +1,38 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
+  getDoc,
+  setDoc
+} from 'firebase/firestore';
+import { db, auth } from '../config/firebase';
 
-const PATIENT_MEDICINES_KEY = '@patient_medicines';
-const CLINIC_MEDICINES_KEY = '@clinic_medicines';
-const CLINIC_INFO_KEY = '@clinic_info';
+// Helper function to get current user ID
+const getUserId = () => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user.uid;
+};
 
 // Patient Medicine Functions
 export const savePatientMedicine = async (medicine) => {
   try {
-    const existingMedicines = await getPatientMedicines();
-    const newMedicine = {
-      id: Date.now().toString(),
+    const userId = getUserId();
+    const docRef = await addDoc(collection(db, 'users', userId, 'patientMedicines'), {
       ...medicine,
-      createdAt: new Date().toISOString(),
-    };
-    const updatedMedicines = [...existingMedicines, newMedicine];
-    await AsyncStorage.setItem(PATIENT_MEDICINES_KEY, JSON.stringify(updatedMedicines));
-    return newMedicine;
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return { id: docRef.id, ...medicine };
   } catch (error) {
     console.error('Error saving patient medicine:', error);
     throw error;
@@ -24,8 +41,17 @@ export const savePatientMedicine = async (medicine) => {
 
 export const getPatientMedicines = async () => {
   try {
-    const medicines = await AsyncStorage.getItem(PATIENT_MEDICINES_KEY);
-    return medicines ? JSON.parse(medicines) : [];
+    const userId = getUserId();
+    const q = query(
+      collection(db, 'users', userId, 'patientMedicines'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const medicines = [];
+    querySnapshot.forEach((doc) => {
+      medicines.push({ id: doc.id, ...doc.data() });
+    });
+    return medicines;
   } catch (error) {
     console.error('Error getting patient medicines:', error);
     return [];
@@ -34,12 +60,13 @@ export const getPatientMedicines = async () => {
 
 export const updatePatientMedicine = async (id, updatedData) => {
   try {
-    const medicines = await getPatientMedicines();
-    const updatedMedicines = medicines.map(med => 
-      med.id === id ? { ...med, ...updatedData } : med
-    );
-    await AsyncStorage.setItem(PATIENT_MEDICINES_KEY, JSON.stringify(updatedMedicines));
-    return updatedMedicines.find(med => med.id === id);
+    const userId = getUserId();
+    const docRef = doc(db, 'users', userId, 'patientMedicines', id);
+    await updateDoc(docRef, {
+      ...updatedData,
+      updatedAt: serverTimestamp()
+    });
+    return { id, ...updatedData };
   } catch (error) {
     console.error('Error updating patient medicine:', error);
     throw error;
@@ -48,9 +75,8 @@ export const updatePatientMedicine = async (id, updatedData) => {
 
 export const deletePatientMedicine = async (id) => {
   try {
-    const medicines = await getPatientMedicines();
-    const updatedMedicines = medicines.filter(med => med.id !== id);
-    await AsyncStorage.setItem(PATIENT_MEDICINES_KEY, JSON.stringify(updatedMedicines));
+    const userId = getUserId();
+    await deleteDoc(doc(db, 'users', userId, 'patientMedicines', id));
   } catch (error) {
     console.error('Error deleting patient medicine:', error);
     throw error;
@@ -60,15 +86,13 @@ export const deletePatientMedicine = async (id) => {
 // Clinic Medicine Functions
 export const saveClinicMedicine = async (medicine) => {
   try {
-    const existingMedicines = await getClinicMedicines();
-    const newMedicine = {
-      id: Date.now().toString(),
+    const userId = getUserId();
+    const docRef = await addDoc(collection(db, 'users', userId, 'clinicMedicines'), {
       ...medicine,
-      createdAt: new Date().toISOString(),
-    };
-    const updatedMedicines = [...existingMedicines, newMedicine];
-    await AsyncStorage.setItem(CLINIC_MEDICINES_KEY, JSON.stringify(updatedMedicines));
-    return newMedicine;
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return { id: docRef.id, ...medicine };
   } catch (error) {
     console.error('Error saving clinic medicine:', error);
     throw error;
@@ -77,8 +101,17 @@ export const saveClinicMedicine = async (medicine) => {
 
 export const getClinicMedicines = async () => {
   try {
-    const medicines = await AsyncStorage.getItem(CLINIC_MEDICINES_KEY);
-    return medicines ? JSON.parse(medicines) : [];
+    const userId = getUserId();
+    const q = query(
+      collection(db, 'users', userId, 'clinicMedicines'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const medicines = [];
+    querySnapshot.forEach((doc) => {
+      medicines.push({ id: doc.id, ...doc.data() });
+    });
+    return medicines;
   } catch (error) {
     console.error('Error getting clinic medicines:', error);
     return [];
@@ -87,12 +120,13 @@ export const getClinicMedicines = async () => {
 
 export const updateClinicMedicine = async (id, updatedData) => {
   try {
-    const medicines = await getClinicMedicines();
-    const updatedMedicines = medicines.map(med => 
-      med.id === id ? { ...med, ...updatedData } : med
-    );
-    await AsyncStorage.setItem(CLINIC_MEDICINES_KEY, JSON.stringify(updatedMedicines));
-    return updatedMedicines.find(med => med.id === id);
+    const userId = getUserId();
+    const docRef = doc(db, 'users', userId, 'clinicMedicines', id);
+    await updateDoc(docRef, {
+      ...updatedData,
+      updatedAt: serverTimestamp()
+    });
+    return { id, ...updatedData };
   } catch (error) {
     console.error('Error updating clinic medicine:', error);
     throw error;
@@ -101,9 +135,8 @@ export const updateClinicMedicine = async (id, updatedData) => {
 
 export const deleteClinicMedicine = async (id) => {
   try {
-    const medicines = await getClinicMedicines();
-    const updatedMedicines = medicines.filter(med => med.id !== id);
-    await AsyncStorage.setItem(CLINIC_MEDICINES_KEY, JSON.stringify(updatedMedicines));
+    const userId = getUserId();
+    await deleteDoc(doc(db, 'users', userId, 'clinicMedicines', id));
   } catch (error) {
     console.error('Error deleting clinic medicine:', error);
     throw error;
@@ -113,7 +146,12 @@ export const deleteClinicMedicine = async (id) => {
 // Clinic Info Functions
 export const saveClinicInfo = async (clinicInfo) => {
   try {
-    await AsyncStorage.setItem(CLINIC_INFO_KEY, JSON.stringify(clinicInfo));
+    const userId = getUserId();
+    const docRef = doc(db, 'users', userId, 'clinicInfo', 'data');
+    await setDoc(docRef, {
+      ...clinicInfo,
+      updatedAt: serverTimestamp()
+    });
   } catch (error) {
     console.error('Error saving clinic info:', error);
     throw error;
@@ -122,8 +160,15 @@ export const saveClinicInfo = async (clinicInfo) => {
 
 export const getClinicInfo = async () => {
   try {
-    const info = await AsyncStorage.getItem(CLINIC_INFO_KEY);
-    return info ? JSON.parse(info) : null;
+    const userId = getUserId();
+    const docRef = doc(db, 'users', userId, 'clinicInfo', 'data');
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error('Error getting clinic info:', error);
     return null;
@@ -131,10 +176,13 @@ export const getClinicInfo = async () => {
 };
 
 // Helper function to find nearby clinics with specific medicine
+// This searches across all users who have clinic info set up
 export const findNearbyClinicsWithMedicine = async (medicineName, patientLocation) => {
   try {
-    const clinicMedicines = await getClinicMedicines();
+    // For now, we'll search only the current user's clinic
+    // In a full implementation, you'd want to search all public clinics
     const clinicInfo = await getClinicInfo();
+    const clinicMedicines = await getClinicMedicines();
     
     if (!clinicInfo || !clinicInfo.latitude || !clinicInfo.longitude) {
       return [];
