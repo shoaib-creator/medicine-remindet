@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import BarcodeScanner from '../components/BarcodeScanner';
+import { useAuth } from '../context/AuthContext';
 import {
   getPatientMedicines,
   savePatientMedicine,
@@ -21,7 +22,8 @@ import {
   findNearbyClinicsWithMedicine,
 } from '../utils/storage';
 
-export default function PatientScreen() {
+export default function PatientScreen({ navigation }) {
+  const { user, logout } = useAuth();
   const [medicines, setMedicines] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
@@ -134,6 +136,26 @@ export default function PatientScreen() {
     });
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await logout();
+            if (!result.success) {
+              Alert.alert('Error', 'Failed to logout');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const isLowStock = (medicine) => {
     return medicine.currentStock <= medicine.minStock;
   };
@@ -188,6 +210,20 @@ export default function PatientScreen() {
 
   return (
     <View style={styles.container}>
+      {/* User Info Header */}
+      <View style={styles.userInfoHeader}>
+        <View style={styles.userInfo}>
+          <Ionicons name="person-circle" size={32} color="#4A90E2" />
+          <View style={styles.userDetails}>
+            <Text style={styles.userEmail}>{user?.email}</Text>
+            <Text style={styles.userLabel}>Patient Account</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#E74C3C" />
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={medicines}
         renderItem={renderMedicineItem}
@@ -333,6 +369,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F6FA',
+  },
+  userInfoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  userDetails: {
+    marginLeft: 12,
+  },
+  userEmail: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2C3E50',
+  },
+  userLabel: {
+    fontSize: 12,
+    color: '#7F8C8D',
+  },
+  logoutButton: {
+    padding: 8,
   },
   listContainer: {
     padding: 16,
