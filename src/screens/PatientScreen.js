@@ -23,7 +23,7 @@ import {
 } from '../utils/storage';
 
 export default function PatientScreen({ navigation }) {
-  const { user, logout } = useAuth();
+  const { user, logout, accountType } = useAuth();
   const [medicines, setMedicines] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
@@ -215,8 +215,12 @@ export default function PatientScreen({ navigation }) {
         <View style={styles.userInfo}>
           <Ionicons name="person-circle" size={32} color="#4A90E2" />
           <View style={styles.userDetails}>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-            <Text style={styles.userLabel}>Patient Account</Text>
+            <Text style={styles.userEmail}>
+              {user?.email || user?.phoneNumber || user?.displayName || 'User'}
+            </Text>
+            <Text style={styles.userLabel}>
+              {accountType === 'clinic' ? 'Clinic Account' : 'Patient Account'}
+            </Text>
           </View>
         </View>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

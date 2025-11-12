@@ -4,14 +4,14 @@ import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase configuration
-// Users should replace these with their own Firebase project credentials
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC_TmJwhxBjvi5ovKNZLfYZv-0NrZ5wvgs",
+  authDomain: "mdicine-reminder.firebaseapp.com",
+  projectId: "mdicine-reminder",
+  storageBucket: "mdicine-reminder.firebasestorage.app",
+  messagingSenderId: "15279474585",
+  appId: "1:15279474585:web:0d830ecfc797866c79b508",
+  measurementId: "G-Z8X946PDQY"
 };
 
 // Initialize Firebase
